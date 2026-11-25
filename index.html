@@ -1,0 +1,3853 @@
+
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#075e54">
+
+<title>Gestion Pharmacie Ramba</title>
+
+<!-- SUPABASE -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --primary:#075e54;
+  --secondary:#0d9488;
+  --background:#f1f5f9;
+  --white:#ffffff;
+  --danger:#dc2626;
+  --success:#16a34a;
+  --warning:#d97706;
+  --text:#1e293b;
+  --border:#e2e8f0;
+}
+
+* {
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+}
+
+body {
+  font-family:Arial,sans-serif;
+  background:var(--background);
+  color:var(--text);
+  font-size:14px;
+}
+
+button,input,select,textarea {
+  font:inherit;
+}
+
+button {
+  cursor:pointer;
+  border:0;
+}
+
+.hidden {
+  display:none !important;
+}
+
+/* LOGIN */
+
+#loginScreen {
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:20px;
+  background:linear-gradient(135deg,#075e54,#0d9488);
+}
+
+.login-card {
+  background:white;
+  width:100%;
+  max-width:400px;
+  padding:28px;
+  border-radius:14px;
+  box-shadow:0 10px 35px #0002;
+}
+
+.login-logo {
+  text-align:center;
+  margin-bottom:25px;
+}
+
+.login-logo h1 {
+  color:var(--primary);
+  font-size:23px;
+  margin-bottom:8px;
+}
+
+.login-logo p {
+  color:#64748b;
+}
+
+.form-group {
+  margin-bottom:16px;
+}
+
+.form-group label {
+  display:block;
+  margin-bottom:7px;
+  font-weight:bold;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width:100%;
+  padding:12px;
+  border:1px solid var(--border);
+  border-radius:7px;
+  outline:none;
+  background:white;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  border-color:var(--secondary);
+}
+
+.btn-primary {
+  background:var(--primary);
+  color:white;
+  padding:12px 16px;
+  border-radius:7px;
+  width:100%;
+  font-weight:bold;
+}
+
+.btn-primary:hover {
+  background:var(--secondary);
+}
+
+#loginError {
+  color:var(--danger);
+  margin-top:12px;
+  text-align:center;
+}
+
+/* APPLICATION */
+
+#appScreen {
+  display:none;
+  min-height:100vh;
+}
+
+.topbar {
+  background:var(--primary);
+  color:white;
+  padding:14px 18px;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  flex-wrap:wrap;
+}
+
+.topbar h2 {
+  font-size:18px;
+}
+
+.topbar-info {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+}
+
+.status-online {
+  color:#bbf7d0;
+}
+
+.logout-btn {
+  background:#ffffff20;
+  color:white;
+  padding:8px 12px;
+  border-radius:6px;
+}
+
+.app-layout {
+  display:flex;
+  min-height:calc(100vh - 55px);
+}
+
+.sidebar {
+  width:230px;
+  background:#ffffff;
+  border-right:1px solid var(--border);
+  padding:15px 10px;
+  flex-shrink:0;
+}
+
+.sidebar-title {
+  font-weight:bold;
+  color:var(--primary);
+  padding:12px;
+}
+
+.nav-btn {
+  display:block;
+  width:100%;
+  padding:12px;
+  margin-bottom:5px;
+  text-align:left;
+  color:#334155;
+  background:transparent;
+  border-radius:7px;
+}
+
+.nav-btn:hover,
+.nav-btn.active {
+  background:#ccfbf1;
+  color:var(--primary);
+  font-weight:bold;
+}
+
+.main-content {
+  flex:1;
+  padding:20px;
+  min-width:0;
+}
+
+.page-title {
+  font-size:22px;
+  margin-bottom:18px;
+  color:var(--primary);
+}
+
+.panel {
+  background:white;
+  padding:18px;
+  border-radius:10px;
+  border:1px solid var(--border);
+  margin-bottom:18px;
+}
+
+.cards-grid {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(160px,1fr));
+  gap:14px;
+  margin-bottom:20px;
+}
+
+.stat-card {
+  background:white;
+  border:1px solid var(--border);
+  padding:18px;
+  border-radius:10px;
+}
+
+.stat-card h3 {
+  color:#64748b;
+  font-size:13px;
+  margin-bottom:10px;
+}
+
+.stat-card strong {
+  font-size:23px;
+  color:var(--primary);
+}
+
+.table-container {
+  width:100%;
+  overflow-x:auto;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  min-width:600px;
+}
+
+th,td {
+  padding:11px;
+  border-bottom:1px solid var(--border);
+  text-align:left;
+}
+
+th {
+  background:#f8fafc;
+  color:var(--primary);
+}
+
+.action-btn {
+  padding:7px 10px;
+  border-radius:5px;
+  background:var(--primary);
+  color:white;
+  margin:2px;
+}
+
+.danger-btn {
+  background:var(--danger);
+}
+
+.warning-btn {
+  background:var(--warning);
+}
+
+.success-btn {
+  background:var(--success);
+}
+
+.toast {
+  position:fixed;
+  bottom:20px;
+  right:15px;
+  max-width:90%;
+  background:#1e293b;
+  color:white;
+  padding:13px 18px;
+  border-radius:8px;
+  z-index:9999;
+  display:none;
+}
+
+.toast.show {
+  display:block;
+}
+
+@media(max-width:700px) {
+  .app-layout {
+    display:block;
+  }
+
+  .sidebar {
+    width:100%;
+    display:flex;
+    overflow-x:auto;
+    gap:5px;
+    border-right:0;
+    border-bottom:1px solid var(--border);
+  }
+
+  .sidebar-title {
+    display:none;
+  }
+
+  .nav-btn {
+    width:auto;
+    white-space:nowrap;
+    margin:0;
+  }
+
+  .main-content {
+    padding:12px;
+  }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================= LOGIN ================= -->
+
+<section id="loginScreen">
+
+  <div class="login-card">
+
+    <div class="login-logo">
+      <h1>GESTION PHARMACIE RAMBA</h1>
+      <p>Votre santé, notre priorité</p>
+      <p>Bujumbura - Burundi</p>
+    </div>
+
+    <form id="loginForm">
+
+      <div class="form-group">
+        <label for="loginEmail">Adresse email</label>
+        <input
+          type="email"
+          id="loginEmail"
+          placeholder="Votre email"
+          required
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="loginPassword">Mot de passe</label>
+        <input
+          type="password"
+          id="loginPassword"
+          placeholder="Votre mot de passe"
+          required
+        >
+      </div>
+
+      <button type="submit" class="btn-primary" id="loginButton">
+        SE CONNECTER
+      </button>
+
+      <p id="loginError"></p>
+
+    </form>
+
+  </div>
+
+</section>
+
+<!-- ================= APPLICATION ================= -->
+
+<section id="appScreen">
+
+  <header class="topbar">
+
+    <h2>GESTION PHARMACIE RAMBA</h2>
+
+    <div class="topbar-info">
+      <span id="connectionStatus" class="status-online">
+        Vérification...
+      </span>
+
+      <span id="currentUserName">
+        Utilisateur
+      </span>
+
+      <button class="logout-btn" id="logoutButton">
+        Déconnexion
+      </button>
+    </div>
+
+  </header>
+
+  <div class="app-layout">
+
+    <!-- MENU -->
+
+    <aside class="sidebar">
+
+      <div class="sidebar-title">MENU PRINCIPAL</div>
+
+      <button class="nav-btn active" data-page="dashboard">
+        Accueil
+      </button>
+
+      <button class="nav-btn" data-page="medicines">
+        Médicaments
+      </button>
+
+      <button class="nav-btn" data-page="stock">
+        Stock
+      </button>
+
+      <button class="nav-btn" data-page="sales">
+        Ventes
+      </button>
+
+      <button class="nav-btn" data-page="branches">
+        Pharmacies
+      </button>
+
+      <button class="nav-btn" data-page="employees">
+        Employés
+      </button>
+
+      <button class="nav-btn" data-page="reports">
+        Rapports
+      </button>
+
+      <button class="nav-btn" data-page="history">
+        Historique
+      </button>
+
+    </aside>
+
+    <!-- CONTENU -->
+
+    <main class="main-content">
+
+      <div id="pageContent">
+
+        <h2 class="page-title">
+          Tableau de bord
+        </h2>
+
+        <p>Bienvenue dans Gestion Pharmacie Ramba.</p>
+
+      </div>
+
+    </main>
+
+  </div>
+
+</section>
+
+<div id="toast" class="toast"></div>
+
+<!-- ================= JAVASCRIPT ================= -->
+
+<script>
+
+// ======================================================
+// GESTION PHARMACIE RAMBA ERP
+// PARTIE 1/4
+// CONFIGURATION - CONNEXION - UTILISATEURS - NAVIGATION
+// ======================================================
+
+// 1. CONFIGURATION SUPABASE
+
+
+const SUPABASE_URL =
+  "https://hxwakendowpsllawxink.supabase.co";
+
+const SUPABASE_ANON_KEY =
+  "sb_publishable_xTcM3AjJCbpF8W_rbUOyxQ_jzCEeq8o";
+
+const supabaseClient = window.supabase.createClient(
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY
+);
+
+// 2. VARIABLES GLOBALES
+
+let currentUser = null;
+let currentProfile = null;
+let currentMemberships = [];
+let currentBranches = [];
+let currentBranchId = null;
+let currentPage = "dashboard";
+let medicineCache = [];
+let stockCache = [];
+let cart = [];
+let lastInvoice = null;
+
+// 3. OUTILS
+
+function $(id) {
+  return document.getElementById(id);
+}
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(
+    /[&<>"']/g,
+    char => ({
+      "&":"&amp;",
+      "<":"&lt;",
+      ">":"&gt;",
+      '"':"&quot;",
+      "'":"&#039;"
+    })[char]
+  );
+}
+
+function formatMoney(value) {
+  return new Intl.NumberFormat("fr-FR", {
+    maximumFractionDigits:0
+  }).format(Number(value) || 0) + " BIF";
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("fr-FR");
+}
+
+function toast(message) {
+  const element = $("toast");
+
+  if (!element) return;
+
+  element.textContent = message;
+  element.classList.add("show");
+
+  setTimeout(() => {
+    element.classList.remove("show");
+  }, 3500);
+}
+
+function showError(message) {
+  console.error(message);
+  toast(message);
+}
+
+// 4. ETAT DE CONNEXION INTERNET
+
+function updateConnectionStatus() {
+  const status = $("connectionStatus");
+
+  if (!status) return;
+
+  if (navigator.onLine) {
+    status.textContent = "En ligne";
+    status.style.color = "#bbf7d0";
+  } else {
+    status.textContent = "Hors ligne";
+    status.style.color = "#fecaca";
+  }
+}
+
+window.addEventListener(
+  "online",
+  updateConnectionStatus
+);
+
+window.addEventListener(
+  "offline",
+  updateConnectionStatus
+);
+
+// 5. GESTION DES ROLES
+
+function hasRole(...roles) {
+  return currentMemberships.some(item =>
+    roles.includes(item.role)
+  );
+}
+
+function isSuperAdmin() {
+  return hasRole("SUPER_ADMIN");
+}
+
+function isDirector() {
+  return hasRole("DIRECTOR");
+}
+
+function canManageMedicines() {
+  return hasRole(
+    "SUPER_ADMIN",
+    "DIRECTOR",
+    "BRANCH_MANAGER",
+    "PHARMACIST"
+  );
+}
+
+function canManageStock() {
+  return hasRole(
+    "SUPER_ADMIN",
+    "DIRECTOR",
+    "BRANCH_MANAGER",
+    "STOREKEEPER",
+    "PHARMACIST"
+  );
+}
+
+function canSell() {
+  return hasRole(
+    "SUPER_ADMIN",
+    "DIRECTOR",
+    "BRANCH_MANAGER",
+    "PHARMACIST",
+    "CASHIER"
+  );
+}
+
+function canManageEmployees() {
+  return hasRole(
+    "SUPER_ADMIN",
+    "DIRECTOR",
+    "BRANCH_MANAGER"
+  );
+}
+
+function getAccessibleBranchIds() {
+  if (isSuperAdmin() || isDirector()) {
+    return currentBranches.map(branch => branch.id);
+  }
+
+  return currentMemberships
+    .map(item => item.branch_id)
+    .filter(Boolean);
+}
+
+// ======================================================
+// IBI BIRANGIRA MU GICE CA 1/4.
+// NTUGAFUNGE SCRIPT CANKE BODY.
+// TUZOBANDANYA MURI 2/4.
+// ======================================================
+
+// ======================================================
+// GESTION PHARMACIE RAMBA ERP
+// PARTIE 2/4
+// CONNEXION - UTILISATEURS - PHARMACIES - NAVIGATION
+// ======================================================
+
+// 1. CHARGEMENT DES DONNEES UTILISATEUR
+
+async function loadUserData() {
+
+  if (!currentUser) {
+    throw new Error("Utilisateur non connecté.");
+  }
+
+  // Charger le profil
+  const { data: profile, error: profileError } =
+    await supabaseClient
+      .from("profiles")
+      .select("*")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+
+  if (profileError) throw profileError;
+
+  if (!profile) {
+    throw new Error("Profil utilisateur introuvable.");
+  }
+
+  if (profile.is_active === false) {
+    throw new Error("Ce compte est désactivé.");
+  }
+
+  currentProfile = profile;
+
+  // Charger les rôles et affectations
+  const { data: memberships, error: membershipError } =
+    await supabaseClient
+      .from("memberships")
+      .select("user_id, branch_id, role")
+      .eq("user_id", currentUser.id);
+
+  if (membershipError) throw membershipError;
+
+  currentMemberships = memberships || [];
+
+  if (currentMemberships.length === 0) {
+    throw new Error(
+      "Aucun rôle ou pharmacie n'est associé à ce compte."
+    );
+  }
+
+  // Charger les pharmacies accessibles
+  let branchQuery = supabaseClient
+    .from("branches")
+    .select("id, code, name, address, phone, is_active")
+    .eq("is_active", true);
+
+  if (!isSuperAdmin() && !isDirector()) {
+
+    const branchIds = getAccessibleBranchIds();
+
+    if (branchIds.length === 0) {
+      throw new Error("Aucune pharmacie accessible.");
+    }
+
+    branchQuery = branchQuery.in("id", branchIds);
+  }
+
+  const { data: branches, error: branchError } =
+    await branchQuery;
+
+  if (branchError) throw branchError;
+
+  currentBranches = branches || [];
+
+  if (currentBranches.length === 0) {
+    throw new Error("Aucune pharmacie active trouvée.");
+  }
+
+  // Choisir la première pharmacie accessible
+  const savedBranch = localStorage.getItem(
+    "ramba_current_branch"
+  );
+
+  const savedBranchExists = currentBranches.some(
+    branch => branch.id === savedBranch
+  );
+
+  currentBranchId = savedBranchExists
+    ? savedBranch
+    : currentBranches[0].id;
+
+  localStorage.setItem(
+    "ramba_current_branch",
+    currentBranchId
+  );
+
+  // Afficher le nom de l'utilisateur
+  $("currentUserName").textContent =
+    currentProfile.full_name || currentUser.email;
+
+  renderBranchSelector();
+
+  return true;
+}
+
+
+// 2. SELECTION DE LA PHARMACIE
+
+function renderBranchSelector() {
+
+  const userName = $("currentUserName");
+
+  if (!userName) return;
+
+  let selector = $("branchSelector");
+
+  if (!selector) {
+
+    selector = document.createElement("select");
+
+    selector.id = "branchSelector";
+
+    selector.style.padding = "7px";
+    selector.style.borderRadius = "6px";
+    selector.style.maxWidth = "180px";
+
+    userName.parentNode.insertBefore(
+      selector,
+      userName
+    );
+  }
+
+  selector.innerHTML = currentBranches.map(branch => `
+    <option
+      value="${escapeHTML(branch.id)}"
+      ${branch.id === currentBranchId ? "selected" : ""}
+    >
+      ${escapeHTML(branch.name)}
+    </option>
+  `).join("");
+
+  selector.disabled =
+    !(isSuperAdmin() || isDirector()) &&
+    currentBranches.length <= 1;
+
+  selector.onchange = async function() {
+
+    const selectedId = this.value;
+
+    const exists = currentBranches.some(
+      branch => branch.id === selectedId
+    );
+
+    if (!exists) {
+      toast("Pharmacie non autorisée.");
+      return;
+    }
+
+    currentBranchId = selectedId;
+
+    localStorage.setItem(
+      "ramba_current_branch",
+      selectedId
+    );
+
+    toast("Pharmacie sélectionnée.");
+
+    await showPage(currentPage);
+  };
+}
+
+
+// 3. CONNEXION
+
+async function login(event) {
+
+  if (event) event.preventDefault();
+
+  const email = $("loginEmail")?.value.trim();
+  const password = $("loginPassword")?.value;
+
+  const errorElement = $("loginError");
+  const button = $("loginButton");
+
+  if (!email || !password) {
+    if (errorElement) {
+      errorElement.textContent =
+        "Veuillez remplir tous les champs.";
+    }
+    return;
+  }
+
+  if (!supabaseClient) {
+    errorElement.textContent =
+      "Erreur : Supabase n'est pas connecté.";
+    return;
+  }
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Connexion en cours...";
+  }
+
+  if (errorElement) errorElement.textContent = "";
+
+  try {
+
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+    if (error) throw error;
+
+    currentUser = data.user;
+
+    console.log("AUTH OK:", currentUser.email);
+
+    await loadUserData();
+
+    $("loginScreen").style.display = "none";
+    $("appScreen").style.display = "block";
+
+    updateConnectionStatus();
+
+    await showPage("dashboard");
+
+    toast("Connexion réussie.");
+
+  } catch (error) {
+
+    console.error("LOGIN ERROR:", error);
+
+    if (errorElement) {
+      errorElement.textContent =
+        error.message || "Erreur de connexion.";
+    }
+
+    currentUser = null;
+    currentProfile = null;
+    currentMemberships = [];
+    currentBranches = [];
+    currentBranchId = null;
+
+    await supabaseClient.auth.signOut();
+
+  } finally {
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "SE CONNECTER";
+    }
+  }
+}
+
+
+
+
+// 4. DECONNEXION
+
+async function logout() {
+
+  const confirmed = confirm(
+    "Voulez-vous vraiment vous déconnecter ?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+
+    const { error } =
+      await supabaseClient.auth.signOut();
+
+    if (error) throw error;
+
+    resetApplication();
+
+    toast("Déconnexion réussie.");
+
+  } catch (error) {
+
+    console.error(error);
+
+    showError(
+      "Impossible de se déconnecter."
+    );
+  }
+}
+
+
+// 5. REINITIALISATION DE L'APPLICATION
+
+function resetApplication() {
+
+  currentUser = null;
+  currentProfile = null;
+  currentMemberships = [];
+  currentBranches = [];
+  currentBranchId = null;
+  currentPage = "dashboard";
+
+  medicineCache = [];
+  stockCache = [];
+  cart = [];
+  lastInvoice = null;
+
+  localStorage.removeItem("ramba_current_branch");
+
+  $("appScreen").style.display = "none";
+  $("loginScreen").style.display = "flex";
+
+  $("loginForm").reset();
+
+  $("loginError").textContent = "";
+}
+
+
+// 6. NAVIGATION ENTRE LES PAGES
+
+async function showPage(page) {
+
+  const allowedPages = [
+    "dashboard",
+    "medicines",
+    "stock",
+    "sales",
+    "branches",
+    "employees",
+    "reports",
+    "history"
+  ];
+
+  if (!allowedPages.includes(page)) {
+    toast("Page inconnue.");
+    return;
+  }
+
+  currentPage = page;
+
+  document.querySelectorAll(".nav-btn").forEach(
+    button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.page === page
+      );
+    }
+  );
+
+  const pageContent = $("pageContent");
+
+  pageContent.innerHTML = `
+    <div class="panel">
+      <p>Chargement en cours...</p>
+    </div>
+  `;
+
+  const pageFunctions = {
+    dashboard: "loadDashboard",
+    medicines: "loadMedicines",
+    stock: "loadStock",
+    sales: "loadSales",
+    branches: "loadBranches",
+    employees: "loadEmployees",
+    reports: "loadReports",
+    history: "loadAuditLogs"
+  };
+
+  const functionName = pageFunctions[page];
+
+  try {
+
+    if (typeof window[functionName] === "function") {
+
+      await window[functionName]();
+
+    } else {
+
+      pageContent.innerHTML = `
+        <h2 class="page-title">
+          ${escapeHTML(page)}
+        </h2>
+        <div class="panel">
+          <p>Cette section sera disponible dans les prochaines parties.</p>
+        </div>
+      `;
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Erreur chargement page:",
+      error
+    );
+
+    pageContent.innerHTML = `
+      <div class="panel">
+        <h3>Erreur de chargement</h3>
+        <p>${escapeHTML(error.message)}</p>
+      </div>
+    `;
+  }
+}
+
+
+// 7. RESTAURATION DE SESSION
+
+async function restoreSession() {
+
+  try {
+
+    const { data, error } =
+      await supabaseClient.auth.getSession();
+
+    if (error) throw error;
+
+    if (!data.session) {
+      resetApplication();
+      return;
+    }
+
+    currentUser = data.session.user;
+
+    await loadUserData();
+
+    $("loginScreen").style.display = "none";
+    $("appScreen").style.display = "block";
+
+    $("currentUserName").textContent =
+      currentProfile.full_name || currentUser.email;
+
+    updateConnectionStatus();
+
+    await showPage("dashboard");
+
+  } catch (error) {
+
+    console.error(
+      "Erreur restauration session:",
+      error
+    );
+
+    await supabaseClient.auth.signOut();
+
+    resetApplication();
+  }
+}
+
+
+// 8. EVENEMENTS DES BOUTONS
+
+$("loginForm").addEventListener(
+  "submit",
+  login
+);
+
+$("logoutButton").addEventListener(
+  "click",
+  logout
+);
+
+document.querySelectorAll(".nav-btn").forEach(
+  button => {
+
+    button.addEventListener("click", async () => {
+
+      await showPage(button.dataset.page);
+
+    });
+
+  }
+);
+
+
+// 9. INITIALISATION
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async function() {
+
+    updateConnectionStatus();
+
+    await restoreSession();
+
+  }
+);
+
+// ======================================================
+// FIN PARTIE 2/4
+// NE PAS FERMER LE SCRIPT.
+// CONTINUER AVEC LA PARTIE 3/4.
+// ======================================================
+
+// ======================================================
+// GESTION PHARMACIE RAMBA ERP
+// PARTIE 2/4
+// CONNEXION - UTILISATEURS - PHARMACIES - NAVIGATION
+// ======================================================
+
+// 1. CHARGEMENT DES DONNEES UTILISATEUR
+
+async function loadUserData() {
+
+  if (!currentUser) {
+    throw new Error("Utilisateur non connecté.");
+  }
+
+  // Charger le profil
+  const { data: profile, error: profileError } =
+    await supabaseClient
+      .from("profiles")
+      .select("*")
+      .eq("id", currentUser.id)
+      .maybeSingle();
+
+  if (profileError) throw profileError;
+
+  if (!profile) {
+    throw new Error("Profil utilisateur introuvable.");
+  }
+
+  if (profile.is_active === false) {
+    throw new Error("Ce compte est désactivé.");
+  }
+
+  currentProfile = profile;
+
+  // Charger les rôles et affectations
+  const { data: memberships, error: membershipError } =
+    await supabaseClient
+      .from("memberships")
+      .select("user_id, branch_id, role")
+      .eq("user_id", currentUser.id);
+
+  if (membershipError) throw membershipError;
+
+  currentMemberships = memberships || [];
+
+  if (currentMemberships.length === 0) {
+    throw new Error(
+      "Aucun rôle ou pharmacie n'est associé à ce compte."
+    );
+  }
+
+  // Charger les pharmacies accessibles
+  let branchQuery = supabaseClient
+    .from("branches")
+    .select("id, code, name, address, phone, is_active")
+    .eq("is_active", true);
+
+  if (!isSuperAdmin() && !isDirector()) {
+
+    const branchIds = getAccessibleBranchIds();
+
+    if (branchIds.length === 0) {
+      throw new Error("Aucune pharmacie accessible.");
+    }
+
+    branchQuery = branchQuery.in("id", branchIds);
+  }
+
+  const { data: branches, error: branchError } =
+    await branchQuery;
+
+  if (branchError) throw branchError;
+
+  currentBranches = branches || [];
+
+  if (currentBranches.length === 0) {
+    throw new Error("Aucune pharmacie active trouvée.");
+  }
+
+  // Choisir la première pharmacie accessible
+  const savedBranch = localStorage.getItem(
+    "ramba_current_branch"
+  );
+
+  const savedBranchExists = currentBranches.some(
+    branch => branch.id === savedBranch
+  );
+
+  currentBranchId = savedBranchExists
+    ? savedBranch
+    : currentBranches[0].id;
+
+  localStorage.setItem(
+    "ramba_current_branch",
+    currentBranchId
+  );
+
+  // Afficher le nom de l'utilisateur
+  $("currentUserName").textContent =
+    currentProfile.full_name || currentUser.email;
+
+  renderBranchSelector();
+
+  return true;
+}
+
+
+// 2. SELECTION DE LA PHARMACIE
+
+function renderBranchSelector() {
+
+  const userName = $("currentUserName");
+
+  if (!userName) return;
+
+  let selector = $("branchSelector");
+
+  if (!selector) {
+
+    selector = document.createElement("select");
+
+    selector.id = "branchSelector";
+
+    selector.style.padding = "7px";
+    selector.style.borderRadius = "6px";
+    selector.style.maxWidth = "180px";
+
+    userName.parentNode.insertBefore(
+      selector,
+      userName
+    );
+  }
+
+  selector.innerHTML = currentBranches.map(branch => `
+    <option
+      value="${escapeHTML(branch.id)}"
+      ${branch.id === currentBranchId ? "selected" : ""}
+    >
+      ${escapeHTML(branch.name)}
+    </option>
+  `).join("");
+
+  selector.disabled =
+    !(isSuperAdmin() || isDirector()) &&
+    currentBranches.length <= 1;
+
+  selector.onchange = async function() {
+
+    const selectedId = this.value;
+
+    const exists = currentBranches.some(
+      branch => branch.id === selectedId
+    );
+
+    if (!exists) {
+      toast("Pharmacie non autorisée.");
+      return;
+    }
+
+    currentBranchId = selectedId;
+
+    localStorage.setItem(
+      "ramba_current_branch",
+      selectedId
+    );
+
+    toast("Pharmacie sélectionnée.");
+
+    await showPage(currentPage);
+  };
+}
+
+
+// 3. CONNEXION
+
+async function login(event) {
+
+  if (event) event.preventDefault();
+
+  const email = $("loginEmail").value.trim();
+  const password = $("loginPassword").value;
+
+  const errorElement = $("loginError");
+  const button = $("loginButton");
+
+  errorElement.textContent = "";
+
+  if (!email || !password) {
+    errorElement.textContent =
+      "Veuillez remplir tous les champs.";
+    return;
+  }
+
+  button.disabled = true;
+  button.textContent = "Connexion en cours...";
+
+  try {
+
+    const { data, error } =
+      await supabaseClient.auth.signInWithPassword({
+        email: email,
+        password: password
+      });
+
+    if (error) throw error;
+
+    currentUser = data.user;
+
+    await loadUserData();
+
+    $("loginScreen").style.display = "none";
+    $("appScreen").style.display = "block";
+
+    updateConnectionStatus();
+
+    await showPage("dashboard");
+
+    toast("Connexion réussie.");
+
+  } catch (error) {
+
+    console.error("Erreur connexion:", error);
+
+    errorElement.textContent =
+      error.message || "Erreur de connexion.";
+
+    await supabaseClient.auth.signOut();
+
+    currentUser = null;
+    currentProfile = null;
+    currentMemberships = [];
+    currentBranches = [];
+    currentBranchId = null;
+
+  } finally {
+
+    button.disabled = false;
+    button.textContent = "SE CONNECTER";
+  }
+}
+
+
+// 4. DECONNEXION
+
+async function logout() {
+
+  const confirmed = confirm(
+    "Voulez-vous vraiment vous déconnecter ?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+
+    const { error } =
+      await supabaseClient.auth.signOut();
+
+    if (error) throw error;
+
+    resetApplication();
+
+    toast("Déconnexion réussie.");
+
+  } catch (error) {
+
+    console.error(error);
+
+    showError(
+      "Impossible de se déconnecter."
+    );
+  }
+}
+
+
+// 5. REINITIALISATION DE L'APPLICATION
+
+function resetApplication() {
+
+  currentUser = null;
+  currentProfile = null;
+  currentMemberships = [];
+  currentBranches = [];
+  currentBranchId = null;
+  currentPage = "dashboard";
+
+  medicineCache = [];
+  stockCache = [];
+  cart = [];
+  lastInvoice = null;
+
+  localStorage.removeItem("ramba_current_branch");
+
+  $("appScreen").style.display = "none";
+  $("loginScreen").style.display = "flex";
+
+  $("loginForm").reset();
+
+  $("loginError").textContent = "";
+}
+
+
+// 6. NAVIGATION ENTRE LES PAGES
+
+async function showPage(page) {
+
+  const allowedPages = [
+    "dashboard",
+    "medicines",
+    "stock",
+    "sales",
+    "branches",
+    "employees",
+    "reports",
+    "history"
+  ];
+
+  if (!allowedPages.includes(page)) {
+    toast("Page inconnue.");
+    return;
+  }
+
+  currentPage = page;
+
+  document.querySelectorAll(".nav-btn").forEach(
+    button => {
+      button.classList.toggle(
+        "active",
+        button.dataset.page === page
+      );
+    }
+  );
+
+  const pageContent = $("pageContent");
+
+  pageContent.innerHTML = `
+    <div class="panel">
+      <p>Chargement en cours...</p>
+    </div>
+  `;
+
+  const pageFunctions = {
+    dashboard: "loadDashboard",
+    medicines: "loadMedicines",
+    stock: "loadStock",
+    sales: "loadSales",
+    branches: "loadBranches",
+    employees: "loadEmployees",
+    reports: "loadReports",
+    history: "loadAuditLogs"
+  };
+
+  const functionName = pageFunctions[page];
+
+  try {
+
+    if (typeof window[functionName] === "function") {
+
+      await window[functionName]();
+
+    } else {
+
+      pageContent.innerHTML = `
+        <h2 class="page-title">
+          ${escapeHTML(page)}
+        </h2>
+        <div class="panel">
+          <p>Cette section sera disponible dans les prochaines parties.</p>
+        </div>
+      `;
+    }
+
+  } catch (error) {
+
+    console.error(
+      "Erreur chargement page:",
+      error
+    );
+
+    pageContent.innerHTML = `
+      <div class="panel">
+        <h3>Erreur de chargement</h3>
+        <p>${escapeHTML(error.message)}</p>
+      </div>
+    `;
+  }
+}
+
+
+// 7. RESTAURATION DE SESSION
+
+async function restoreSession() {
+
+  try {
+
+    const { data, error } =
+      await supabaseClient.auth.getSession();
+
+    if (error) throw error;
+
+    if (!data.session) {
+      resetApplication();
+      return;
+    }
+
+    currentUser = data.session.user;
+
+    await loadUserData();
+
+    $("loginScreen").style.display = "none";
+    $("appScreen").style.display = "block";
+
+    $("currentUserName").textContent =
+      currentProfile.full_name || currentUser.email;
+
+    updateConnectionStatus();
+
+    await showPage("dashboard");
+
+  } catch (error) {
+
+    console.error(
+      "Erreur restauration session:",
+      error
+    );
+
+    await supabaseClient.auth.signOut();
+
+    resetApplication();
+  }
+}
+
+
+// 8. EVENEMENTS DES BOUTONS
+
+$("loginForm").addEventListener(
+  "submit",
+  login
+);
+
+$("logoutButton").addEventListener(
+  "click",
+  logout
+);
+
+document.querySelectorAll(".nav-btn").forEach(
+  button => {
+
+    button.addEventListener("click", async () => {
+
+      await showPage(button.dataset.page);
+
+    });
+
+  }
+);
+
+
+// 9. INITIALISATION
+
+document.addEventListener(
+  "DOMContentLoaded",
+  async function() {
+
+    updateConnectionStatus();
+
+    await restoreSession();
+
+  }
+);
+
+// ======================================================
+// FIN PARTIE 2/4
+// NE PAS FERMER LE SCRIPT.
+// CONTINUER AVEC LA PARTIE 3/4.
+// ======================================================
+
+// ======================================================
+// GESTION PHARMACIE RAMBA ERP
+// PARTIE 3/4
+// MEDICAMENTS - STOCK - RECEPTION - ALERTES
+// ======================================================
+
+// ------------------------------------------------------
+// 1. CHARGER LES MEDICAMENTS
+// ------------------------------------------------------
+
+async function loadMedicines() {
+
+  $("pageContent").innerHTML = `
+    <h2 class="page-title">Gestion des médicaments</h2>
+
+    <div class="panel">
+      <button class="action-btn success-btn" id="addMedicineButton">
+        + Ajouter médicament
+      </button>
+
+      <input
+        type="search"
+        id="medicineSearch"
+        placeholder="Rechercher un médicament..."
+        style="padding:10px;width:100%;margin-top:15px;border:1px solid #ddd;border-radius:6px;"
+      >
+    </div>
+
+    <div class="panel">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Nom</th>
+              <th>Dosage</th>
+              <th>Forme</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="medicinesTableBody">
+            <tr><td colspan="5">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="medicineFormContainer"></div>
+  `;
+
+  const { data, error } = await supabaseClient
+    .from("medicines")
+    .select("id,code,barcode,name,generic_name,strength,dosage_form")
+    .order("name");
+
+  if (error) throw error;
+
+  medicineCache = data || [];
+
+  renderMedicinesTable(medicineCache);
+
+  $("addMedicineButton").onclick = () => {
+    renderMedicineForm();
+  };
+
+  $("medicineSearch").oninput = function() {
+
+    const search = this.value.toLowerCase();
+
+    const filtered = medicineCache.filter(medicine =>
+      [
+        medicine.code,
+        medicine.name,
+        medicine.generic_name,
+        medicine.strength
+      ].join(" ").toLowerCase().includes(search)
+    );
+
+    renderMedicinesTable(filtered);
+  };
+}
+
+
+// ------------------------------------------------------
+// 2. AFFICHER LE TABLEAU DES MEDICAMENTS
+// ------------------------------------------------------
+
+function renderMedicinesTable(rows) {
+
+  const tbody = $("medicinesTableBody");
+
+  if (!tbody) return;
+
+  if (!rows.length) {
+    tbody.innerHTML = `
+      <tr><td colspan="5">Aucun médicament trouvé.</td></tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(medicine => `
+    <tr>
+      <td>${escapeHTML(medicine.code)}</td>
+      <td>
+        <strong>${escapeHTML(medicine.name)}</strong>
+        <br>
+        <small>${escapeHTML(medicine.generic_name || "")}</small>
+      </td>
+      <td>${escapeHTML(medicine.strength || "-")}</td>
+      <td>${escapeHTML(medicine.dosage_form || "-")}</td>
+      <td>
+        <button class="action-btn" data-edit-medicine="${escapeHTML(medicine.id)}">
+          Modifier
+        </button>
+        <button class="action-btn danger-btn" data-delete-medicine="${escapeHTML(medicine.id)}">
+          Supprimer
+        </button>
+      </td>
+    </tr>
+  `).join("");
+}
+
+
+// ------------------------------------------------------
+// 3. FORMULAIRE MEDICAMENT
+// ------------------------------------------------------
+
+function renderMedicineForm(medicine = null) {
+
+  if (!canManageMedicines()) {
+    toast("Permission refusée.");
+    return;
+  }
+
+  $("medicineFormContainer").innerHTML = `
+    <div class="panel">
+
+      <h3>${medicine ? "Modifier médicament" : "Nouveau médicament"}</h3>
+
+      <form id="medicineForm">
+
+        <div class="form-group">
+          <label>Code médicament</label>
+          <input id="medicineCode" required
+            value="${escapeHTML(medicine?.code || "")}">
+        </div>
+
+        <div class="form-group">
+          <label>Code-barres</label>
+          <input id="medicineBarcode"
+            value="${escapeHTML(medicine?.barcode || "")}">
+        </div>
+
+        <div class="form-group">
+          <label>Nom du médicament</label>
+          <input id="medicineName" required
+            value="${escapeHTML(medicine?.name || "")}">
+        </div>
+
+        <div class="form-group">
+          <label>Nom générique</label>
+          <input id="medicineGeneric"
+            value="${escapeHTML(medicine?.generic_name || "")}">
+        </div>
+
+        <div class="form-group">
+          <label>Dosage</label>
+          <input id="medicineStrength"
+            placeholder="Ex: 500 mg"
+            value="${escapeHTML(medicine?.strength || "")}">
+        </div>
+
+        <div class="form-group">
+          <label>Forme pharmaceutique</label>
+          <select id="medicineForm" required>
+            <option value="">Choisir</option>
+            ${[
+              "Comprimé",
+              "Gélule",
+              "Sirop",
+              "Injection",
+              "Crème",
+              "Pommade",
+              "Gouttes",
+              "Sachet",
+              "Autre"
+            ].map(form => `
+              <option value="${form}"
+                ${medicine?.dosage_form === form ? "selected" : ""}>
+                ${form}
+              </option>
+            `).join("")}
+          </select>
+        </div>
+
+        <button class="action-btn success-btn" type="submit">
+          Enregistrer
+        </button>
+
+        <button class="action-btn danger-btn" type="button"
+          id="cancelMedicineForm">
+          Annuler
+        </button>
+
+      </form>
+    </div>
+  `;
+
+  $("medicineForm").onsubmit = async function(event) {
+    event.preventDefault();
+    await saveMedicine(medicine?.id || null);
+  };
+
+  $("cancelMedicineForm").onclick = () => {
+    $("medicineFormContainer").innerHTML = "";
+  };
+}
+
+
+// ------------------------------------------------------
+// 4. ENREGISTRER UN MEDICAMENT
+// ------------------------------------------------------
+
+async function saveMedicine(id = null) {
+
+  if (!canManageMedicines()) {
+    toast("Vous n'avez pas la permission.");
+    return;
+  }
+
+  const payload = {
+    code: $("medicineCode").value.trim(),
+    barcode: $("medicineBarcode").value.trim() || null,
+    name: $("medicineName").value.trim(),
+    generic_name: $("medicineGeneric").value.trim() || null,
+    strength: $("medicineStrength").value.trim() || null,
+    dosage_form: $("medicineForm").value
+  };
+
+  if (!payload.code || !payload.name || !payload.dosage_form) {
+    toast("Veuillez remplir les champs obligatoires.");
+    return;
+  }
+
+  try {
+
+    let result;
+
+    if (id) {
+
+      result = await supabaseClient
+        .from("medicines")
+        .update(payload)
+        .eq("id", id);
+
+    } else {
+
+      result = await supabaseClient
+        .from("medicines")
+        .insert(payload);
+    }
+
+    if (result.error) throw result.error;
+
+    toast("Médicament enregistré.");
+
+    await loadMedicines();
+
+  } catch (error) {
+
+    console.error(error);
+    showError("Erreur: " + error.message);
+  }
+}
+
+
+// ------------------------------------------------------
+// 5. MODIFIER UN MEDICAMENT
+// ------------------------------------------------------
+
+function editMedicine(id) {
+
+  const medicine = medicineCache.find(
+    item => item.id === id
+  );
+
+  if (!medicine) {
+    toast("Médicament introuvable.");
+    return;
+  }
+
+  renderMedicineForm(medicine);
+}
+
+
+// ------------------------------------------------------
+// 6. SUPPRIMER UN MEDICAMENT
+// ------------------------------------------------------
+
+async function deleteMedicine(id) {
+
+  if (!canManageMedicines()) {
+    toast("Permission refusée.");
+    return;
+  }
+
+  const confirmed = confirm(
+    "Voulez-vous vraiment supprimer ce médicament ?"
+  );
+
+  if (!confirmed) return;
+
+  try {
+
+    const { error } = await supabaseClient
+      .from("medicines")
+      .delete()
+      .eq("id", id);
+
+    if (error) throw error;
+
+    toast("Médicament supprimé.");
+
+    await loadMedicines();
+
+  } catch (error) {
+
+    showError(
+      "Suppression impossible. Ce médicament peut être utilisé dans le stock ou les ventes."
+    );
+
+    console.error(error);
+  }
+}
+
+
+// ------------------------------------------------------
+// 7. CHARGER LE STOCK
+// ------------------------------------------------------
+
+async function loadStock() {
+
+  if (!currentBranchId) {
+    throw new Error("Veuillez sélectionner une pharmacie.");
+  }
+
+  $("pageContent").innerHTML = `
+    <h2 class="page-title">Gestion du stock</h2>
+
+    <div class="panel">
+      <button class="action-btn success-btn" id="newReceptionButton">
+        + Nouvelle réception
+      </button>
+
+      <input
+        id="stockSearch"
+        type="search"
+        placeholder="Rechercher médicament ou numéro de lot..."
+        style="width:100%;padding:10px;margin-top:15px;border:1px solid #ddd;border-radius:6px;"
+      >
+    </div>
+
+    <div class="cards-grid" id="stockAlertCards"></div>
+
+    <div class="panel">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Médicament</th>
+              <th>Lot</th>
+              <th>Péremption</th>
+              <th>Quantité</th>
+              <th>Prix achat</th>
+              <th>Prix vente</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="stockTableBody">
+            <tr><td colspan="7">Chargement...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div id="receptionFormContainer"></div>
+  `;
+
+  // Charger aussi les médicaments pour le formulaire de réception
+  const { data: medicines, error: medicineError } =
+    await supabaseClient
+      .from("medicines")
+      .select("id,code,name")
+      .order("name");
+
+  if (medicineError) throw medicineError;
+
+  medicineCache = medicines || [];
+
+  const { data, error } = await supabaseClient
+    .from("medicine_batches")
+    .select(`
+      id,
+      branch_id,
+      medicine_id,
+      lot_number,
+      expiry_date,
+      quantity_base_units,
+      purchase_price,
+      selling_price,
+      status,
+      medicines(name,code)
+    `)
+    .eq("branch_id", currentBranchId)
+    .order("expiry_date", { ascending: true });
+
+  if (error) throw error;
+
+  stockCache = data || [];
+
+  renderStockTable(stockCache);
+
+  renderStockAlerts(stockCache);
+
+  $("newReceptionButton").onclick = () => {
+    renderReceptionForm();
+  };
+
+  $("stockSearch").oninput = function() {
+
+    const search = this.value.toLowerCase();
+
+    const filtered = stockCache.filter(item => {
+
+      const name = item.medicines?.name || "";
+
+      return [
+        name,
+        item.lot_number,
+        item.status
+      ].join(" ").toLowerCase().includes(search);
+    });
+
+    renderStockTable(filtered);
+  };
+}
+
+
+// ------------------------------------------------------
+// 8. AFFICHER LE STOCK
+// ------------------------------------------------------
+
+function renderStockTable(rows) {
+
+  const tbody = $("stockTableBody");
+
+  if (!tbody) return;
+
+  if (!rows.length) {
+    tbody.innerHTML = `
+      <tr><td colspan="7">Aucun stock trouvé.</td></tr>
+    `;
+    return;
+  }
+
+  tbody.innerHTML = rows.map(item => {
+
+    const quantity = Number(item.quantity_base_units || 0);
+
+    const expired = item.expiry_date &&
+      new Date(item.expiry_date) < new Date();
+
+    const status = expired
+      ? "PÉRIMÉ"
+      : quantity <= 0
+        ? "ÉPUISÉ"
+        : item.status || "ACTIF";
+
+    return `
+      <tr>
+        <td>
+          ${escapeHTML(item.medicines?.name || "Inconnu")}
+        </td>
+        <td>${escapeHTML(item.lot_number || "-")}</td>
+        <td>${formatDate(item.expiry_date)}</td>
+        <td>${quantity}</td>
+        <td>${formatMoney(item.purchase_price)}</td>
+        <td>${formatMoney(item.selling_price)}</td>
+        <td>
+          <strong>${escapeHTML(status)}</strong>
+        </td>
+      </tr>
+    `;
+
+  }).join("");
+}
+
+
+// ------------------------------------------------------
+// 9. ALERTES DE STOCK
+// ------------------------------------------------------
+
+function renderStockAlerts(rows) {
+
+  const container = $("stockAlertCards");
+
+  if (!container) return;
+
+  const today = new Date();
+
+  const expired = rows.filter(item =>
+    item.expiry_date &&
+    new Date(item.expiry_date) < today
+  );
+
+  const nearExpiry = rows.filter(item => {
+
+    if (!item.expiry_date) return false;
+
+    const expiry = new Date(item.expiry_date);
+
+    const days = Math.ceil(
+      (expiry - today) / 86400000
+    );
+
+    return days >= 0 && days <= 90;
+  });
+
+  const empty = rows.filter(item =>
+    Number(item.quantity_base_units || 0) <= 0
+  );
+
+  const lowStock = rows.filter(item =>
+    Number(item.quantity_base_units || 0) > 0 &&
+    Number(item.quantity_base_units || 0) <= 10
+  );
+
+  container.innerHTML = `
+    <div class="stat-card">
+      <h3>Lots périmés</h3>
+      <strong style="color:#dc2626">${expired.length}</strong>
+    </div>
+
+    <div class="stat-card">
+      <h3>Péremption proche</h3>
+      <strong style="color:#d97706">${nearExpiry.length}</strong>
+    </div>
+
+    <div class="stat-card">
+      <h3>Stock faible</h3>
+      <strong>${lowStock.length}</strong>
+    </div>
+
+    <div class="stat-card">
+      <h3>Stock épuisé</h3>
+      <strong style="color:#dc2626">${empty.length}</strong>
+    </div>
+  `;
+}
+
+
+// ------------------------------------------------------
+// 10. FORMULAIRE DE RECEPTION
+// ------------------------------------------------------
+
+function renderReceptionForm() {
+
+  if (!canManageStock()) {
+    toast("Vous n'avez pas la permission de gérer le stock.");
+    return;
+  }
+
+  if (!medicineCache.length) {
+    toast("Ajoutez d'abord les médicaments.");
+    return;
+  }
+
+  $("receptionFormContainer").innerHTML = `
+    <div class="panel">
+
+      <h3>Nouvelle réception de stock</h3>
+
+      <form id="receptionForm">
+
+        <div class="form-group">
+          <label>Médicament</label>
+
+          <select id="receptionMedicine" required>
+            <option value="">Choisir un médicament</option>
+
+            ${medicineCache.map(item => `
+              <option value="${escapeHTML(item.id)}">
+                ${escapeHTML(item.name)}
+              </option>
+            `).join("")}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>Numéro de lot</label>
+          <input id="receptionLot" required>
+        </div>
+
+        <div class="form-group">
+          <label>Date de péremption</label>
+          <input type="date" id="receptionExpiry" required>
+        </div>
+
+        <div class="form-group">
+          <label>Nombre de cartons</label>
+          <input type="number" id="receptionCartons" min="0" value="0">
+        </div>
+
+        <div class="form-group">
+          <label>Boîtes par carton</label>
+          <input type="number" id="receptionBoxes" min="1" value="1" required>
+        </div>
+
+        <div class="form-group">
+          <label>Unités par boîte</label>
+          <input type="number" id="receptionUnits" min="1" value="1" required>
+        </div>
+
+        <div class="form-group">
+          <label>Boîtes supplémentaires</label>
+          <input type="number" id="receptionExtraBoxes" min="0" value="0">
+        </div>
+
+        <div class="form-group">
+          <label>Unités supplémentaires</label>
+          <input type="number" id="receptionExtraUnits" min="0" value="0">
+        </div>
+
+        <div class="form-group">
+          <label>Prix d'achat par unité</label>
+          <input type="number" id="receptionPurchasePrice" min="0" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+          <label>Prix de vente par unité</label>
+          <input type="number" id="receptionSellingPrice" min="0" step="0.01" required>
+        </div>
+
+        <div class="form-group">
+          <label>Méthode de sortie</label>
+          <select id="receptionStockMethod">
+            <option value="FIFO">FIFO</option>
+            <option value="LIFO">LIFO</option>
+          </select>
+        </div>
+
+        <p id="receptionQuantityPreview">
+          Quantité totale: 0 unité
+        </p>
+
+        <button type="submit" class="action-btn success-btn">
+          Enregistrer la réception
+        </button>
+
+        <button type="button" class="action-btn danger-btn"
+          id="cancelReception">
+          Annuler
+        </button>
+
+      </form>
+    </div>
+  `;
+
+  const fields = [
+    "receptionCartons",
+    "receptionBoxes",
+    "receptionUnits",
+    "receptionExtraBoxes",
+    "receptionExtraUnits"
+  ];
+
+  function calculateReceptionQuantity() {
+
+    const cartons = Number($("receptionCartons").value || 0);
+    const boxesPerCarton = Number($("receptionBoxes").value || 1);
+    const unitsPerBox = Number($("receptionUnits").value || 1);
+    const extraBoxes = Number($("receptionExtraBoxes").value || 0);
+    const extraUnits = Number($("receptionExtraUnits").value || 0);
+
+    const total =
+      (cartons * boxesPerCarton * unitsPerBox) +
+      (extraBoxes * unitsPerBox) +
+      extraUnits;
+
+    $("receptionQuantityPreview").textContent =
+      "Quantité totale: " + total + " unités";
+
+    return total;
+  }
+
+  fields.forEach(id => {
+    $(id).addEventListener(
+      "input",
+      calculateReceptionQuantity
+    );
+  });
+
+  $("receptionForm").onsubmit = async function(event) {
+    event.preventDefault();
+    await saveReception();
+  };
+
+  $("cancelReception").onclick = () => {
+    $("receptionFormContainer").innerHTML = "";
+  };
+}
+
+
+// ------------------------------------------------------
+// 11. ENREGISTRER UNE RECEPTION
+// ------------------------------------------------------
+
+async function saveReception() {
+
+  if (!canManageStock()) {
+    toast("Permission refusée.");
+    return;
+  }
+
+  const medicineId = $("receptionMedicine").value;
+  const lotNumber = $("receptionLot").value.trim();
+  const expiryDate = $("receptionExpiry").value;
+
+  const cartons = Number($("receptionCartons").value || 0);
+  const boxesPerCarton = Number($("receptionBoxes").value || 1);
+  const unitsPerBox = Number($("receptionUnits").value || 1);
+  const extraBoxes = Number($("receptionExtraBoxes").value || 0);
+  const extraUnits = Number($("receptionExtraUnits").value || 0);
+
+  const purchasePrice = Number(
+    $("receptionPurchasePrice").value
+  );
+
+  const sellingPrice = Number(
+    $("receptionSellingPrice").value
+  );
+
+  const stockMethod = $("receptionStockMethod").value;
+
+  const quantity =
+    cartons * boxesPerCarton * unitsPerBox +
+    extraBoxes * unitsPerBox +
+    extraUnits;
+
+  if (!medicineId || !lotNumber || !expiryDate) {
+    toast("Veuillez remplir les informations obligatoires.");
+    return;
+  }
+
+  if (
+    quantity <= 0 ||
+    boxesPerCarton <= 0 ||
+    unitsPerBox <= 0 ||
+    purchasePrice < 0 ||
+    sellingPrice <= 0
+  ) {
+    toast("Vérifiez les quantités et les prix.");
+    return;
+  }
+
+  if (new Date(expiryDate + "T23:59:59") < new Date()) {
+    toast("Impossible de recevoir un lot déjà périmé.");
+    return;
+  }
+
+  try {
+
+    const { error } = await supabaseClient
+      .from("medicine_batches")
+      .insert({
+        branch_id: currentBranchId,
+        medicine_id: medicineId,
+        lot_number: lotNumber,
+        expiry_date: expiryDate,
+        quantity_base_units: quantity,
+        purchase_price: purchasePrice,
+        selling_price: sellingPrice,
+        status: "ACTIVE"
+      });
+
+    if (error) throw error;
+
+    toast(
+      "Réception enregistrée: " + quantity + " unités."
+    );
+
+    await loadStock();
+
+  } catch (error) {
+
+    console.error(error);
+
+    showError(
+      "Erreur réception: " + error.message
+    );
+  }
+}
+
+
+// ------------------------------------------------------
+// 12. GESTION DES EVENEMENTS MEDICAMENTS
+// ------------------------------------------------------
+
+document.addEventListener("click", async function(event) {
+
+  const editButton = event.target.closest(
+    "[data-edit-medicine]"
+  );
+
+  if (editButton) {
+
+    editMedicine(
+      editButton.dataset.editMedicine
+    );
+
+    return;
+  }
+
+  const deleteButton = event.target.closest(
+    "[data-delete-medicine]"
+  );
+
+  if (deleteButton) {
+
+    await deleteMedicine(
+      deleteButton.dataset.deleteMedicine
+    );
+
+    return;
+  }
+
+});
+
+
+// ======================================================
+// FIN PARTIE 3/4
+// NE PAS FERMER LE SCRIPT.
+// CONTINUER AVEC LA PARTIE 4/4.
+// ======================================================
+
+// ======================================================
+// GESTION PHARMACIE RAMBA ERP
+// PARTIE 4/4
+// VENTES - FACTURES - RAPPORTS - EMPLOYES
+// ======================================================
+
+// ------------------------------------------------------
+// 1. PAGE DES VENTES
+// ------------------------------------------------------
+
+async function loadSales() {
+
+  if (!canSell()) {
+    throw new Error("Vous n'avez pas la permission de vendre.");
+  }
+
+  $("pageContent").innerHTML = `
+    <h2 class="page-title">Gestion des ventes</h2>
+
+    <div class="panel">
+
+      <h3>Nouvelle vente</h3>
+
+      <div class="form-group">
+        <label>Rechercher un médicament</label>
+        <input id="saleMedicineSearch"
+          placeholder="Nom ou code médicament">
+      </div>
+
+      <div id="saleMedicineResults"></div>
+
+      <div class="form-group">
+        <label>Méthode de sortie du stock</label>
+        <select id="saleStockMethod">
+          <option value="FIFO">FIFO - Premier entré, premier sorti</option>
+          <option value="LIFO">LIFO - Dernier entré, premier sorti</option>
+        </select>
+      </div>
+
+    </div>
+
+    <div class="panel">
+      <h3>Panier</h3>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Médicament</th>
+              <th>Quantité</th>
+              <th>Prix unitaire</th>
+              <th>Total</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+
+          <tbody id="saleCartBody"></tbody>
+        </table>
+      </div>
+
+      <div style="margin-top:15px">
+        <div class="form-group">
+          <label>Remise (BIF)</label>
+          <input id="saleDiscount" type="number" min="0" value="0">
+        </div>
+
+        <div class="form-group">
+          <label>Mode de paiement</label>
+          <select id="salePaymentMethod">
+            <option value="CASH">Espèces</option>
+            <option value="MOBILE_MONEY">Mobile Money</option>
+            <option value="BANK">Banque</option>
+          </select>
+        </div>
+
+        <h3 id="saleSubtotal">Sous-total: 0 BIF</h3>
+        <h3 id="saleTotal">Total: 0 BIF</h3>
+
+        <button class="action-btn success-btn"
+          id="completeSaleButton">
+          Valider la vente
+        </button>
+
+        <button class="action-btn danger-btn"
+          id="clearCartButton">
+          Nouvelle vente / Vider panier
+        </button>
+      </div>
+
+    </div>
+
+    <div id="invoiceContainer"></div>
+  `;
+
+  cart = [];
+
+  renderSaleCart();
+
+  $("saleMedicineSearch").oninput = async function() {
+
+    const term = this.value.trim().toLowerCase();
+
+    if (!term) {
+      $("saleMedicineResults").innerHTML = "";
+      return;
+    }
+
+    const matches = medicineCache.filter(medicine =>
+      [
+        medicine.name,
+        medicine.code,
+        medicine.generic_name
+      ].join(" ").toLowerCase().includes(term)
+    );
+
+    $("saleMedicineResults").innerHTML = matches.map(medicine => `
+      <div class="panel">
+        <strong>${escapeHTML(medicine.name)}</strong>
+        <br>
+        <small>${escapeHTML(medicine.code || "")}</small>
+        <button class="action-btn"
+          data-add-sale="${escapeHTML(medicine.id)}">
+          Ajouter
+        </button>
+      </div>
+    `).join("");
+  };
+
+  $("completeSaleButton").onclick = completeSale;
+
+  $("clearCartButton").onclick = () => {
+
+    if (!confirm("Voulez-vous vider le panier ?")) return;
+
+    cart = [];
+    renderSaleCart();
+  };
+
+  $("saleDiscount").oninput = renderSaleCart;
+}
+
+
+// ------------------------------------------------------
+// 2. AJOUTER UN MEDICAMENT AU PANIER
+// ------------------------------------------------------
+
+async function addSaleItem(medicineId) {
+
+  if (!canSell()) {
+    toast("Permission refusée.");
+    return;
+  }
+
+  if (!currentBranchId) {
+    toast("Sélectionnez une pharmacie.");
+    return;
+  }
+
+  try {
+
+    const { data: batches, error } = await supabaseClient
+      .from("medicine_batches")
+      .select("id,lot_number,expiry_date,quantity_base_units,selling_price,status,created_at")
+      .eq("branch_id", currentBranchId)
+      .eq("medicine_id", medicineId)
+      .eq("status", "ACTIVE")
+      .gt("quantity_base_units", 0)
+      .order("expiry_date", { ascending: true });
+
+    if (error) throw error;
+
+    const validBatches = (batches || []).filter(batch =>
+      batch.expiry_date &&
+      new Date(batch.expiry_date + "T23:59:59") >= new Date()
+    );
+
+    if (!validBatches.length) {
+      toast("Stock indisponible ou médicament périmé.");
+      return;
+    }
+
+    const medicine = medicineCache.find(
+      item => item.id === medicineId
+    );
+
+    if (!medicine) {
+      toast("Médicament introuvable.");
+      return;
+    }
+
+    const existing = cart.find(
+      item => item.medicine_id === medicineId
+    );
+
+    if (existing) {
+      existing.quantity += 1;
+    } else {
+
+      cart.push({
+        medicine_id: medicineId,
+        name: medicine.name,
+        quantity: 1,
+        unit_price: Number(validBatches[0].selling_price),
+        available: validBatches.reduce(
+          (sum, batch) =>
+            sum + Number(batch.quantity_base_units || 0),
+          0
+        )
+      });
+    }
+
+    const item = cart.find(
+      row => row.medicine_id === medicineId
+    );
+
+    if (item.quantity > item.available) {
+
+      item.quantity = item.available;
+
+      toast("Quantité supérieure au stock disponible.");
+
+    }
+
+    renderSaleCart();
+
+  } catch (error) {
+
+    console.error(error);
+
+    showError(error.message);
+  }
+}
+
+
+// ------------------------------------------------------
+// 3. CALCUL DU PANIER
+// ------------------------------------------------------
+
+function calculateSaleTotals() {
+
+  const subtotal = cart.reduce(
+    (sum, item) =>
+      sum + item.quantity * item.unit_price,
+    0
+  );
+
+  const discount = Math.max(
+    0,
+    Number($("saleDiscount")?.value || 0)
+  );
+
+  const total = Math.max(0, subtotal - discount);
+
+  return {
+    subtotal,
+    discount,
+    total
+  };
+}
+
+
+// ------------------------------------------------------
+// 4. AFFICHER LE PANIER
+// ------------------------------------------------------
+
+function renderSaleCart() {
+
+  const tbody = $("saleCartBody");
+
+  if (!tbody) return;
+
+  if (!cart.length) {
+
+    tbody.innerHTML = `
+      <tr><td colspan="5">Panier vide.</td></tr>
+    `;
+
+  } else {
+
+    tbody.innerHTML = cart.map(item => `
+      <tr>
+        <td>${escapeHTML(item.name)}</td>
+
+        <td>
+          <input
+            type="number"
+            min="1"
+            max="${item.available}"
+            value="${item.quantity}"
+            data-cart-quantity="${escapeHTML(item.medicine_id)}"
+            style="width:65px;padding:5px"
+          >
+        </td>
+
+        <td>${formatMoney(item.unit_price)}</td>
+
+        <td>${formatMoney(item.quantity * item.unit_price)}</td>
+
+        <td>
+          <button class="action-btn danger-btn"
+            data-remove-sale="${escapeHTML(item.medicine_id)}">
+            Retirer
+          </button>
+        </td>
+      </tr>
+    `).join("");
+  }
+
+  const totals = calculateSaleTotals();
+
+  $("saleSubtotal").textContent =
+    "Sous-total: " + formatMoney(totals.subtotal);
+
+  $("saleTotal").textContent =
+    "Total: " + formatMoney(totals.total);
+}
+
+
+// ------------------------------------------------------
+// 5. MODIFIER OU RETIRER UN ARTICLE
+// ------------------------------------------------------
+
+document.addEventListener("change", function(event) {
+
+  const input = event.target.closest("[data-cart-quantity]");
+
+  if (!input) return;
+
+  const id = input.dataset.cartQuantity;
+
+  const item = cart.find(
+    row => row.medicine_id === id
+  );
+
+  if (!item) return;
+
+  const quantity = Math.floor(Number(input.value));
+
+  if (!Number.isFinite(quantity) || quantity < 1) {
+    item.quantity = 1;
+  } else if (quantity > item.available) {
+    item.quantity = item.available;
+    toast("Stock insuffisant.");
+  } else {
+    item.quantity = quantity;
+  }
+
+  renderSaleCart();
+});
+
+
+document.addEventListener("click", async function(event) {
+
+  const addButton = event.target.closest("[data-add-sale]");
+
+  if (addButton) {
+
+    await addSaleItem(addButton.dataset.addSale);
+
+    return;
+  }
+
+  const removeButton = event.target.closest("[data-remove-sale]");
+
+  if (removeButton) {
+
+    cart = cart.filter(
+      item => item.medicine_id !== removeButton.dataset.removeSale
+    );
+
+    renderSaleCart();
+  }
+
+});
+
+
+// ------------------------------------------------------
+// 6. VALIDER LA VENTE
+// ------------------------------------------------------
+
+
+async function completeSale() {
+
+  if (!canSell()) {
+    toast("Vous n'avez pas la permission de vendre.");
+    return;
+  }
+
+  if (!currentBranchId) {
+    toast("Veuillez sélectionner une pharmacie.");
+    return;
+  }
+
+  if (!cart.length) {
+    toast("Le panier est vide.");
+    return;
+  }
+
+  const totals = calculateSaleTotals();
+
+  if (totals.discount > totals.subtotal) {
+    toast("La remise ne peut pas dépasser le sous-total.");
+    return;
+  }
+
+  for (const item of cart) {
+    if (
+      Number(item.quantity) <= 0 ||
+      Number(item.quantity) > Number(item.available)
+    ) {
+      toast("Quantité invalide pour " + item.name);
+      return;
+    }
+  }
+
+  const paymentMethod =
+    $("salePaymentMethod")?.value || "CASH";
+
+  const amountInput = $("saleAmountPaid");
+
+  const amountPaid =
+    amountInput && amountInput.value.trim() !== ""
+      ? Number(amountInput.value)
+      : Number(totals.total);
+
+  if (!Number.isFinite(amountPaid) || amountPaid < 0) {
+    toast("Montant payé invalide.");
+    return;
+  }
+
+  if (amountPaid > Number(totals.total)) {
+    toast("Le montant payé ne peut pas dépasser le total.");
+    return;
+  }
+
+  const confirmed = confirm(
+    "Confirmer la vente de " +
+    formatMoney(totals.total) +
+    " ?"
+  );
+
+  if (!confirmed) return;
+
+  const button = $("completeSaleButton");
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = "Enregistrement...";
+  }
+
+  try {
+
+    // Données envoyées à la fonction SQL process_sale
+    const payload = {
+      p_branch_id: currentBranchId,
+
+      p_items: cart.map(item => ({
+        medicine_id: item.medicine_id,
+        quantity: Number(item.quantity)
+      })),
+
+      p_customer_name:
+        $("saleCustomerName")?.value?.trim() || null,
+
+      p_customer_phone:
+        $("saleCustomerPhone")?.value?.trim() || null,
+
+      p_discount: Number(totals.discount),
+
+      p_amount_paid: amountPaid,
+
+      p_payment_method: paymentMethod,
+
+      p_notes:
+        $("saleNotes")?.value?.trim() || null
+    };
+
+    // Appel de la bonne fonction Supabase
+    const { data, error } = await supabaseClient.rpc(
+      "process_sale",
+      payload
+    );
+
+    if (error) throw error;
+
+    const sale = Array.isArray(data) ? data[0] : data;
+
+    if (!sale || !sale.sale_id) {
+      throw new Error(
+        "Aucune référence de vente n'a été retournée."
+      );
+    }
+
+    // Récupérer les vrais articles enregistrés
+    let invoiceItems = [];
+
+    try {
+
+      const { data: savedItems, error: itemsError } =
+        await supabaseClient
+          .from("sale_items")
+          .select(`
+            quantity,
+            unit_price,
+            discount,
+            line_total,
+            medicines (
+              name,
+              code
+            )
+          `)
+          .eq("sale_id", sale.sale_id);
+
+      if (itemsError) throw itemsError;
+
+      invoiceItems = (savedItems || []).map(item => ({
+        name: item.medicines?.name || "Médicament",
+        code: item.medicines?.code || "",
+        quantity: Number(item.quantity),
+        unit_price: Number(item.unit_price),
+        discount: Number(item.discount || 0),
+        total: Number(item.line_total)
+      }));
+
+    } catch (invoiceError) {
+
+      console.error(
+        "Erreur récupération articles facture:",
+        invoiceError
+      );
+
+      // Solution de secours pour afficher la facture
+      invoiceItems = cart.map(item => ({
+        name: item.name,
+        code: item.code || "",
+        quantity: Number(item.quantity),
+        unit_price: Number(item.unit_price || 0),
+        discount: 0,
+        total:
+          Number(item.quantity) *
+          Number(item.unit_price || 0)
+      }));
+    }
+
+    // Préparer la facture avec les résultats du serveur
+    lastInvoice = {
+      sale_id: sale.sale_id,
+
+      invoice_number:
+        sale.invoice_number || sale.sale_id,
+
+      created_at: new Date().toISOString(),
+
+      subtotal: Number(sale.subtotal ?? totals.subtotal),
+
+      discount: Number(sale.discount ?? totals.discount),
+
+      total_amount: Number(
+        sale.total_amount ?? totals.total
+      ),
+
+      amount_paid: Number(
+        sale.amount_paid ?? amountPaid
+      ),
+
+      remaining_amount: Number(
+        sale.remaining_amount ??
+        (Number(sale.total_amount ?? totals.total) - amountPaid)
+      ),
+
+      payment_status: sale.payment_status || "UNPAID",
+
+      payment_method: paymentMethod,
+
+      customer_name:
+        $("saleCustomerName")?.value?.trim() || "",
+
+      customer_phone:
+        $("saleCustomerPhone")?.value?.trim() || "",
+
+      branch_id: currentBranchId,
+
+      items: invoiceItems
+    };
+
+    // Afficher la facture une seule fois
+    renderInvoice(lastInvoice);
+
+    // Vider le panier après confirmation de l'enregistrement
+    cart = [];
+
+    toast("Vente enregistrée avec succès.");
+
+    // Actualiser le stock
+    await loadSalesAfterCheckout();
+
+    // Rafraîchir l'affichage si cette fonction existe
+    if (typeof loadStock === "function") {
+      await loadStock();
+    }
+
+  } catch (error) {
+
+    console.error("Erreur vente:", error);
+
+    showError(
+      "Vente non enregistrée : " +
+      (error.message || "Erreur inconnue")
+    );
+
+  } finally {
+
+    if (button) {
+      button.disabled = false;
+      button.textContent = "Valider la vente";
+    }
+  }
+}
+
+
+// ------------------------------------------------------
+// 7. ACTUALISER LE STOCK APRES LA VENTE
+// ------------------------------------------------------
+
+async function loadSalesAfterCheckout() {
+
+  try {
+
+    const { data, error } = await supabaseClient
+      .from("medicine_batches")
+      .select("id,branch_id,medicine_id,lot_number,expiry_date,quantity_base_units,status")
+      .eq("branch_id", currentBranchId);
+
+    if (error) throw error;
+
+    stockCache = data || [];
+
+  } catch (error) {
+
+    console.error("Actualisation stock:", error);
+  }
+}
+
+
+// ------------------------------------------------------
+// 8. GENERER UNE FACTURE PROFESSIONNELLE
+// ------------------------------------------------------
+
+function renderInvoice(invoice) {
+
+  const branch = currentBranches.find(
+    item => item.id === invoice.branch_id
+  );
+
+  const container = $("invoiceContainer");
+
+  if (!container) return;
+
+  const safe = value => escapeHTML(
+    value === null || value === undefined
+      ? ""
+      : String(value)
+  );
+
+  const items = Array.isArray(invoice.items)
+    ? invoice.items
+    : [];
+
+  const subtotal = Number(invoice.subtotal || 0);
+  const discount = Number(invoice.discount || 0);
+  const total = Number(invoice.total_amount || 0);
+  const paid = Number(invoice.amount_paid || 0);
+  const remaining = Math.max(0, total - paid);
+
+  const paymentStatus =
+    invoice.payment_status ||
+    (remaining <= 0 ? "PAID" : paid > 0 ? "PARTIAL" : "UNPAID");
+
+  const statusLabels = {
+    PAID: "PAYÉE",
+    PARTIAL: "PARTIELLEMENT PAYÉE",
+    UNPAID: "NON PAYÉE",
+    REFUNDED: "REMBOURSÉE"
+  };
+
+  const statusColors = {
+    PAID: "#15803d",
+    PARTIAL: "#d97706",
+    UNPAID: "#dc2626",
+    REFUNDED: "#64748b"
+  };
+
+  const paymentLabels = {
+    CASH: "Espèces",
+    MOBILE_MONEY: "Mobile Money",
+    BANK_TRANSFER: "Virement bancaire",
+    CARD: "Carte bancaire"
+  };
+
+  const paymentMethod =
+    paymentLabels[invoice.payment_method] ||
+    invoice.payment_method ||
+    "Non renseigné";
+
+  const invoiceDate = invoice.created_at
+    ? new Date(invoice.created_at).toLocaleString("fr-FR")
+    : new Date().toLocaleString("fr-FR");
+
+  container.innerHTML = `
+
+    <div id="invoiceDocument">
+
+      <style>
+        #invoiceDocument {
+          background: #ffffff;
+          color: #1e293b;
+          max-width: 850px;
+          margin: 20px auto;
+          padding: 35px;
+          border: 1px solid #e2e8f0;
+          border-radius: 8px;
+          font-family: Arial, sans-serif;
+          font-size: 13px;
+        }
+
+        #invoiceDocument * {
+          box-sizing: border-box;
+        }
+
+        #invoiceDocument .invoice-header {
+          display: flex;
+          justify-content: space-between;
+          gap: 20px;
+          border-bottom: 3px solid #075e54;
+          padding-bottom: 20px;
+        }
+
+        #invoiceDocument .brand-name {
+          color: #075e54;
+          font-size: 27px;
+          font-weight: 800;
+          margin: 0 0 5px;
+        }
+
+        #invoiceDocument .invoice-title {
+          color: #075e54;
+          text-align: right;
+          font-size: 25px;
+          margin: 0 0 8px;
+        }
+
+        #invoiceDocument .invoice-info {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: 15px;
+          margin: 25px 0;
+        }
+
+        #invoiceDocument .info-box {
+          background: #f8fafc;
+          border: 1px solid #e2e8f0;
+          padding: 14px;
+          border-radius: 6px;
+        }
+
+        #invoiceDocument .info-box h4 {
+          color: #075e54;
+          margin: 0 0 10px;
+          font-size: 13px;
+        }
+
+        #invoiceDocument table {
+          width: 100%;
+          border-collapse: collapse;
+          margin-top: 15px;
+        }
+
+        #invoiceDocument th {
+          background: #075e54;
+          color: white;
+          padding: 11px 8px;
+          text-align: left;
+        }
+
+        #invoiceDocument td {
+          border-bottom: 1px solid #e2e8f0;
+          padding: 11px 8px;
+          vertical-align: top;
+        }
+
+        #invoiceDocument .text-right {
+          text-align: right;
+        }
+
+        #invoiceDocument .totals {
+          width: 100%;
+          max-width: 350px;
+          margin: 20px 0 0 auto;
+        }
+
+        #invoiceDocument .total-line {
+          display: flex;
+          justify-content: space-between;
+          gap: 15px;
+          padding: 7px 0;
+          border-bottom: 1px solid #e2e8f0;
+        }
+
+        #invoiceDocument .grand-total {
+          color: #075e54;
+          font-size: 19px;
+          font-weight: bold;
+          border-top: 2px solid #075e54;
+          margin-top: 8px;
+          padding-top: 12px;
+        }
+
+        #invoiceDocument .payment-status {
+          display: inline-block;
+          padding: 6px 12px;
+          border-radius: 20px;
+          color: white;
+          font-weight: bold;
+          font-size: 11px;
+          background: ${statusColors[paymentStatus] || "#64748b"};
+        }
+
+        #invoiceDocument .invoice-footer {
+          text-align: center;
+          border-top: 1px solid #cbd5e1;
+          margin-top: 35px;
+          padding-top: 18px;
+          color: #64748b;
+        }
+
+        #invoiceDocument .invoice-actions {
+          display: flex;
+          justify-content: center;
+          gap: 10px;
+          margin-top: 25px;
+        }
+
+        #invoiceDocument .invoice-actions button {
+          padding: 12px 20px;
+          border: 0;
+          border-radius: 6px;
+          background: #075e54;
+          color: white;
+          font-weight: bold;
+          cursor: pointer;
+        }
+
+        @media (max-width: 600px) {
+          #invoiceDocument {
+            padding: 15px;
+            margin: 10px 0;
+          }
+
+          #invoiceDocument .invoice-header {
+            flex-direction: column;
+          }
+
+          #invoiceDocument .invoice-title {
+            text-align: left;
+          }
+
+          #invoiceDocument .invoice-info {
+            grid-template-columns: 1fr;
+          }
+
+          #invoiceDocument table {
+            font-size: 11px;
+          }
+
+          #invoiceDocument th,
+          #invoiceDocument td {
+            padding: 7px 4px;
+          }
+        }
+
+        @media print {
+          body * {
+            visibility: hidden !important;
+          }
+
+          #invoiceDocument,
+          #invoiceDocument * {
+            visibility: visible !important;
+          }
+
+          #invoiceDocument {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            max-width: none;
+            margin: 0;
+            padding: 10mm;
+            border: 0;
+            border-radius: 0;
+            box-shadow: none;
+          }
+
+          #invoiceDocument .invoice-actions {
+            display: none !important;
+          }
+
+          @page {
+            size: A4;
+            margin: 10mm;
+          }
+        }
+      </style>
+
+      <div class="invoice-header">
+
+        <div>
+          <h1 class="brand-name">PHARMACIE RAMBA</h1>
+          <p><strong>Votre santé, notre priorité</strong></p>
+          <p>${safe(branch?.name || "Pharmacie Ramba")}</p>
+          <p>${safe(branch?.address || "Bujumbura, Burundi")}</p>
+          <p>${safe(branch?.phone || "")}</p>
+          <p>BURUNDI</p>
+        </div>
+
+        <div>
+          <h2 class="invoice-title">FACTURE</h2>
+          <p><strong>N° :</strong> ${safe(invoice.invoice_number)}</p>
+          <p><strong>Date :</strong> ${safe(invoiceDate)}</p>
+          <p><strong>Référence :</strong> ${safe(invoice.sale_id)}</p>
+          <p>
+            <span class="payment-status">
+              ${safe(statusLabels[paymentStatus] || paymentStatus)}
+            </span>
+          </p>
+        </div>
+
+      </div>
+
+      <div class="invoice-info">
+
+        <div class="info-box">
+          <h4>INFORMATIONS CLIENT</h4>
+          <p><strong>Nom :</strong>
+            ${safe(invoice.customer_name || "Client comptoir")}
+          </p>
+          <p><strong>Téléphone :</strong>
+            ${safe(invoice.customer_phone || "Non renseigné")}
+          </p>
+        </div>
+
+        <div class="info-box">
+          <h4>INFORMATIONS DE PAIEMENT</h4>
+          <p><strong>Mode :</strong> ${safe(paymentMethod)}</p>
+          <p><strong>Devise :</strong> BIF</p>
+          <p><strong>Statut :</strong>
+            ${safe(statusLabels[paymentStatus] || paymentStatus)}
+          </p>
+        </div>
+
+      </div>
+
+      <h3>DÉTAILS DES ARTICLES</h3>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Désignation</th>
+            <th>Qté</th>
+            <th class="text-right">Prix unitaire</th>
+            <th class="text-right">Total</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          ${
+            items.length
+              ? items.map(item => `
+                <tr>
+                  <td>
+                    <strong>${safe(item.name)}</strong>
+                    ${
+                      item.code
+                        ? `<br><small>Code : ${safe(item.code)}</small>`
+                        : ""
+                    }
+                  </td>
+                  <td>${Number(item.quantity || 0)}</td>
+                  <td class="text-right">
+                    ${formatMoney(item.unit_price)}
+                  </td>
+                  <td class="text-right">
+                    ${formatMoney(item.total)}
+                  </td>
+                </tr>
+              `).join("")
+              : `<tr><td colspan="4">Aucun article disponible</td></tr>`
+          }
+        </tbody>
+      </table>
+
+      <div class="totals">
+
+        <div class="total-line">
+          <span>Sous-total</span>
+          <strong>${formatMoney(subtotal)}</strong>
+        </div>
+
+        <div class="total-line">
+          <span>Remise</span>
+          <strong>${formatMoney(discount)}</strong>
+        </div>
+
+        <div class="total-line grand-total">
+          <span>TOTAL TTC</span>
+          <span>${formatMoney(total)}</span>
+        </div>
+
+        <div class="total-line">
+          <span>Montant payé</span>
+          <strong>${formatMoney(paid)}</strong>
+        </div>
+
+        <div class="total-line">
+          <span>Reste à payer</span>
+          <strong>${formatMoney(remaining)}</strong>
+        </div>
+
+      </div>
+
+      <div class="invoice-footer">
+        <h3>MERCI POUR VOTRE CONFIANCE</h3>
+        <p>PHARMACIE RAMBA - Bujumbura, Burundi</p>
+        <p>Conservez cette facture comme preuve de votre achat.</p>
+        <p><small>Document généré électroniquement.</small></p>
+      </div>
+
+      <div class="invoice-actions">
+        <button type="button" id="printInvoiceButton">
+          Imprimer la facture
+        </button>
+      </div>
+
+    </div>
+  `;
+
+  const printButton = $("printInvoiceButton");
+
+  if (printButton) {
+    printButton.onclick = printInvoice;
+  }
+}
+
+
+  
+
+
+// ------------------------------------------------------
+// 9. IMPRIMER LA FACTURE
+// ------------------------------------------------------
+
+function printInvoice() {
+
+  const invoice = $("invoiceDocument");
+
+  if (!invoice) {
+    toast("Facture introuvable.");
+    return;
+  }
+
+  const printWindow = window.open("", "_blank");
+
+  if (!printWindow) {
+    toast("Autorisez les fenêtres popup pour imprimer.");
+    return;
+  }
+
+  printWindow.document.write(`
+    <!DOCTYPE html>
+    <html lang="fr">
+    <head>
+      <meta charset="UTF-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title>Facture Pharmacie Ramba</title>
+
+      <style>
+        body {
+          font-family:Arial,sans-serif;
+          padding:25px;
+          color:#1e293b;
+        }
+
+        table {
+          width:100%;
+          border-collapse:collapse;
+          margin-top:20px;
+        }
+
+        th,td {
+          border:1px solid #ddd;
+          padding:9px;
+          text-align:left;
+        }
+
+        th {
+          background:#f1f5f9;
+        }
+
+        button {
+          display:none;
+        }
+
+        @media print {
+          body {
+            padding:0;
+          }
+        }
+      </style>
+    </head>
+
+    <body>
+      ${invoice.innerHTML}
+
+      <script>
+        window.onload = function() {
+          window.print();
+        };
+      <\/script>
+    </body>
+    </html>
+  `);
+
+  printWindow.document.close();
+}
+
+
+// ------------------------------------------------------
+// 10. GESTION DES PHARMACIES
+// ------------------------------------------------------
+
+async function loadBranches() {
+
+  if (!isSuperAdmin() && !isDirector()) {
+    throw new Error("Permission refusée.");
+  }
+
+  $("pageContent").innerHTML = `
+    <h2 class="page-title">Gestion des pharmacies</h2>
+
+    <div class="panel">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Code</th>
+              <th>Nom</th>
+              <th>Adresse</th>
+              <th>Téléphone</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="branchesTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  const { data, error } = await supabaseClient
+    .from("branches")
+    .select("id,code,name,address,phone,is_active")
+    .order("name");
+
+  if (error) throw error;
+
+  $("branchesTableBody").innerHTML = (data || []).map(branch => `
+    <tr>
+      <td>${escapeHTML(branch.code)}</td>
+      <td>${escapeHTML(branch.name)}</td>
+      <td>${escapeHTML(branch.address || "-")}</td>
+      <td>${escapeHTML(branch.phone || "-")}</td>
+      <td>${branch.is_active ? "Active" : "Inactive"}</td>
+    </tr>
+  `).join("");
+}
+
+
+// ------------------------------------------------------
+// 11. GESTION DES EMPLOYES
+// ------------------------------------------------------
+
+async function loadEmployees() {
+
+  if (!canManageEmployees()) {
+    throw new Error("Permission refusée.");
+  }
+
+  $("pageContent").innerHTML = `
+    <h2 class="page-title">Gestion des employés</h2>
+
+    <div class="panel">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Nom complet</th>
+              <th>Téléphone</th>
+              <th>Rôle</th>
+              <th>Pharmacie</th>
+              <th>Statut</th>
+            </tr>
+          </thead>
+          <tbody id="employeesTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  const { data, error } = await supabaseClient
+    .from("memberships")
+    .select(`
+      user_id,
+      branch_id,
+      role,
+      profiles(full_name,phone,is_active),
+      branches(name)
+    `);
+
+  if (error) throw error;
+
+  const rows = data || [];
+
+  $("employeesTableBody").innerHTML = rows.map(item => `
+    <tr>
+      <td>${escapeHTML(item.profiles?.full_name || "-")}</td>
+      <td>${escapeHTML(item.profiles?.phone || "-")}</td>
+      <td>${escapeHTML(item.role)}</td>
+      <td>${escapeHTML(item.branches?.name || "-")}</td>
+      <td>
+        ${item.profiles?.is_active ? "Actif" : "Inactif"}
+      </td>
+    </tr>
+  `).join("");
+}
+
+
+// ------------------------------------------------------
+// 12. RAPPORTS
+// ------------------------------------------------------
+
+async function loadReports() {
+
+  if (!currentBranchId) {
+    throw new Error("Aucune pharmacie sélectionnée.");
+  }
+
+  $("pageContent").innerHTML = `
+    <h2 class="page-title">Rapports</h2>
+
+    <div class="panel">
+      <h3>Rapport des ventes</h3>
+
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Facture</th>
+              <th>Total</th>
+            </tr>
+          </thead>
+
+          <tbody id="reportsTableBody"></tbody>
+        </table>
+      </div>
+
+      <h3 id="reportsTotal" style="margin-top:15px"></h3>
+    </div>
+  `;
+
+  const { data, error } = await supabaseClient
+    .from("sales")
+    .select("id,invoice_number,total_amount,created_at")
+    .eq("branch_id", currentBranchId)
+    .order("created_at", { ascending: false })
+    .limit(100);
+
+  if (error) throw error;
+
+  const rows = data || [];
+
+  $("reportsTableBody").innerHTML = rows.map(sale => `
+    <tr>
+      <td>${formatDate(sale.created_at)}</td>
+      <td>${escapeHTML(sale.invoice_number || sale.id)}</td>
+      <td>${formatMoney(sale.total_amount)}</td>
+    </tr>
+  `).join("");
+
+  const total = rows.reduce(
+    (sum, sale) =>
+      sum + Number(sale.total_amount || 0),
+    0
+  );
+
+  $("reportsTotal").textContent =
+    "Total des ventes affichées: " + formatMoney(total);
+}
+
+
+// ------------------------------------------------------
+// 13. HISTORIQUE ET AUDIT
+// ------------------------------------------------------
+
+async function loadAuditLogs() {
+
+  if (!currentBranchId) {
+    throw new Error("Aucune pharmacie sélectionnée.");
+  }
+
+  $("pageContent").innerHTML = `
+    <h2 class="page-title">Historique des activités</h2>
+
+    <div class="panel">
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Action</th>
+              <th>Entité</th>
+              <th>Utilisateur</th>
+              <th>Date</th>
+            </tr>
+          </thead>
+
+          <tbody id="auditTableBody"></tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  const { data, error } = await supabaseClient
+    .from("audit_logs")
+    .select("id,action,entity_type,created_at,user_id")
+    .order("created_at", { ascending: false })
+    .limit(50);
+
+  if (error) throw error;
+
+  $("auditTableBody").innerHTML = (data || []).map(log => `
+    <tr>
+      <td>${escapeHTML(log.action)}</td>
+      <td>${escapeHTML(log.entity_type || "-")}</td>
+      <td>${escapeHTML(log.user_id || "-")}</td>
+      <td>${formatDate(log.created_at)}</td>
+    </tr>
+  `).join("");
+}
+
+
+// ------------------------------------------------------
+// 14. INITIALISATION FINALE
+// ------------------------------------------------------
+
+updateConnectionStatus();
+
+// ======================================================
+// FIN DU JAVASCRIPT
+// ======================================================
+
+</script>
+
+</body>
+</html>
